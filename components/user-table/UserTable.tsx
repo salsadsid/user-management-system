@@ -1,4 +1,6 @@
 "use client";
+import { Button } from "@/components/ui/button";
+import { Select } from "@/components/ui/select";
 import {
   flexRender,
   getCoreRowModel,
@@ -8,8 +10,18 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React from "react";
 
-export function UserTable({ data }: { data: any[] }) {
-  const [selectedUser, setSelectedUser] = React.useState<any | null>(null);
+type User = {
+  id: number;
+  name: string;
+  username: string;
+  email: string;
+  phone?: string;
+  website?: string;
+  [key: string]: any;
+};
+
+export function UserTable({ data }: { data: User[] }) {
+  const router = useRouter();
   const [page, setPage] = React.useState(0);
   const [pageSize, setPageSize] = React.useState(5);
 
@@ -25,7 +37,8 @@ export function UserTable({ data }: { data: any[] }) {
     []
   );
 
-  const pageCount = Math.ceil(data.length / pageSize);
+  const pageCount = Math.max(1, Math.ceil(data.length / pageSize));
+
   const pagedData = React.useMemo(() => {
     const start = page * pageSize;
     return data.slice(start, start + pageSize);
@@ -37,65 +50,61 @@ export function UserTable({ data }: { data: any[] }) {
     getCoreRowModel: getCoreRowModel(),
   });
 
-  const router = useRouter();
+  React.useEffect(() => setPage(0), [pageSize]);
 
-  React.useEffect(() => {
-    setPage(0);
-  }, [pageSize]);
+  const hideOnMobile = React.useMemo(
+    () => new Set(["username", "phone", "website"]),
+    []
+  );
 
   return (
     <div>
-      <div className="overflow-x-auto">
-        <div className="mb-2 flex items-center gap-2">
-          <label htmlFor="page-size" className="text-sm">
-            Users per page:
-          </label>
-          <select
-            id="page-size"
-            value={pageSize}
+      <div className="mb-3 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <label className="text-sm">Users per page:</label>
+          <Select
+            value={String(pageSize)}
             onChange={(e) => setPageSize(Number(e.target.value))}
-            className="border rounded px-2 py-1"
+            aria-label="Users per page"
           >
-            {[5, 10, 15, 20].map((size) => (
-              <option key={size} value={size}>
-                {size}
+            {[5, 10, 15, 20].map((s) => (
+              <option key={s} value={String(s)}>
+                {s}
               </option>
             ))}
-          </select>
+          </Select>
         </div>
-        <table className="min-w-full border border-gray-200 rounded">
-          <thead className="bg-gray-100">
-            {table.getHeaderGroups().map((headerGroup) => (
-              <tr key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  const hideOnMobile = new Set([
-                    "username",
-                    "phone",
-                    "website",
-                  ]);
-                  const respClass = hideOnMobile.has(header.id)
-                    ? "hidden sm:table-cell"
-                    : "";
-                  return (
-                    <th
-                      key={header.id}
-                      className={`px-4 py-2 border-b text-left ${respClass}`}
-                    >
-                      {flexRender(
-                        header.column.columnDef.header,
-                        header.getContext()
-                      )}
-                    </th>
-                  );
-                })}
+        <div className="text-sm text-muted-foreground">
+          Showing {pagedData.length} of {data.length}
+        </div>
+      </div>
+
+      <div className="overflow-x-auto">
+        <table className="min-w-full border border-gray-200 rounded-lg bg-white">
+          <thead className="bg-gray-50">
+            {table.getHeaderGroups().map((hg) => (
+              <tr key={hg.id}>
+                {hg.headers.map((header) => (
+                  <th
+                    key={header.id}
+                    className={`px-4 py-3 text-left text-sm font-medium text-gray-700 border-b ${
+                      hideOnMobile.has(header.id) ? "hidden sm:table-cell" : ""
+                    }`}
+                  >
+                    {flexRender(
+                      header.column.columnDef.header,
+                      header.getContext()
+                    )}
+                  </th>
+                ))}
               </tr>
             ))}
           </thead>
+
           <tbody>
-            {table.getRowModel().rows.map((row) => (
+            {table.getRowModel().rows.map((row, rIdx) => (
               <tr
                 key={row.id}
-                className="cursor-pointer hover:bg-gray-50"
                 role="button"
                 tabIndex={0}
                 onClick={() => router.push(`/user/${row.original.id}`)}
@@ -105,66 +114,71 @@ export function UserTable({ data }: { data: any[] }) {
                     router.push(`/user/${row.original.id}`);
                   }
                 }}
+                className={`hover:bg-gray-100 ${
+                  rIdx % 2 === 0 ? "bg-white" : "bg-gray-50"
+                }`}
               >
-                {row.getVisibleCells().map((cell) => {
-                  const hideOnMobile = new Set([
-                    "username",
-                    "phone",
-                    "website",
-                  ]);
-                  const respClass = hideOnMobile.has(cell.column.id)
-                    ? "hidden sm:table-cell"
-                    : "";
-                  return (
-                    <td
-                      key={cell.id}
-                      className={`px-4 py-2 border-b ${respClass}`}
-                    >
-                      {cell.column.id === "name" ? (
-                        <Link
-                          href={`/user/${row.original.id}`}
-                          className="text-blue-600 underline cursor-pointer"
-                          onClick={(e: any) => e.stopPropagation()}
-                        >
-                          {flexRender(
-                            cell.column.columnDef.cell,
-                            cell.getContext()
-                          ) ?? String(cell.getValue())}
-                        </Link>
-                      ) : (
-                        flexRender(
+                {row.getVisibleCells().map((cell) => (
+                  <td
+                    key={cell.id}
+                    className={`px-4 py-3 text-sm text-gray-800 border-b ${
+                      hideOnMobile.has(cell.column.id)
+                        ? "hidden sm:table-cell"
+                        : ""
+                    }`}
+                  >
+                    {cell.column.id === "name" ? (
+                      <Link
+                        href={`/user/${row.original.id}`}
+                        onClick={(e) => e.stopPropagation()}
+                        className="text-blue-600 font-medium"
+                      >
+                        {flexRender(
                           cell.column.columnDef.cell,
                           cell.getContext()
-                        ) ?? String(cell.getValue())
-                      )}
-                    </td>
-                  );
-                })}
+                        ) ?? String(cell.getValue())}
+                      </Link>
+                    ) : (
+                      <span>
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        ) ?? String(cell.getValue())}
+                      </span>
+                    )}
+                  </td>
+                ))}
               </tr>
             ))}
           </tbody>
         </table>
-        {/* Pagination Controls */}
-        <div className="flex items-center justify-center gap-2 mt-4">
-          <button
-            className="px-3 py-1 border rounded disabled:opacity-50"
-            onClick={() => setPage((p) => Math.max(p - 1, 0))}
+      </div>
+
+      {pageCount > 1 && (
+        <div className="flex items-center justify-center gap-3 mt-4">
+          <Button
+            variant="outline"
+            size="sm"
             disabled={page === 0}
+            onClick={() => setPage((p) => Math.max(p - 1, 0))}
           >
             Previous
-          </button>
-          <span>
+          </Button>
+
+          <div className="text-sm">
             Page {page + 1} of {pageCount}
-          </span>
-          <button
-            className="px-3 py-1 border rounded disabled:opacity-50"
-            onClick={() => setPage((p) => Math.min(p + 1, pageCount - 1))}
+          </div>
+
+          <Button
+            variant="outline"
+            size="sm"
             disabled={page >= pageCount - 1}
+            onClick={() => setPage((p) => Math.min(p + 1, pageCount - 1))}
           >
             Next
-          </button>
+          </Button>
         </div>
-      </div>
+      )}
     </div>
   );
 }
