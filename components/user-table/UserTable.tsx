@@ -1,6 +1,12 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import { Select } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   flexRender,
   getCoreRowModel,
@@ -64,14 +70,18 @@ export function UserTable({ data }: { data: User[] }) {
           <label className="text-sm">Users per page:</label>
           <Select
             value={String(pageSize)}
-            onChange={(e) => setPageSize(Number(e.target.value))}
-            aria-label="Users per page"
+            onValueChange={(v) => setPageSize(Number(v))}
           >
-            {[5, 10, 15, 20].map((s) => (
-              <option key={s} value={String(s)}>
-                {s}
-              </option>
-            ))}
+            <SelectTrigger size="sm">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {[5, 10, 15, 20].map((s) => (
+                <SelectItem key={s} value={String(s)}>
+                  {s}
+                </SelectItem>
+              ))}
+            </SelectContent>
           </Select>
         </div>
         <div className="text-sm text-muted-foreground">

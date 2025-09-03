@@ -1,5 +1,6 @@
 "use client";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { UserTable } from "@/components/user-table/UserTable";
 import { useQuery } from "@tanstack/react-query";
 import React from "react";
@@ -16,17 +17,18 @@ export default function Home() {
     queryFn: fetchUsers,
   });
 
-  const [search, setSearch] = React.useState("");
+  const [searchInput, setSearchInput] = React.useState("");
+  const [query, setQuery] = React.useState("");
 
   const filteredData = React.useMemo(() => {
     if (!data) return [];
-    const lowerSearch = search.toLowerCase();
+    const lowerSearch = query.toLowerCase();
     return data.filter(
       (user: any) =>
         user.name.toLowerCase().includes(lowerSearch) ||
         user.email.toLowerCase().includes(lowerSearch)
     );
-  }, [data, search]);
+  }, [data, query]);
 
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -38,39 +40,28 @@ export default function Home() {
               Manage and view users
             </p>
           </div>
-          <div className="hidden sm:flex items-center gap-2">
-            <button className="px-4 py-2 bg-primary text-primary-foreground rounded-md shadow">
-              New User
-            </button>
-          </div>
         </header>
 
         <div className="bg-white shadow rounded-lg p-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-3">
             <div className="flex-1 flex gap-2">
-              <input
+              <Input
                 type="text"
                 placeholder="Search by name or email..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="flex-1 sm:max-w-md px-4 py-2 border rounded-md focus:ring-2 focus:ring-primary/30"
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    setQuery(searchInput.trim());
+                  }
+                }}
               />
               <Button
                 variant="default"
-                size="sm"
-                onClick={() => {
-                  /* keep as client-side filter; button emphasizes action */
-                }}
+                onClick={() => setQuery(searchInput.trim())}
               >
                 Search
-              </Button>
-            </div>
-            <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm">
-                Export
-              </Button>
-              <Button variant="outline" size="sm">
-                Filters
               </Button>
             </div>
           </div>
