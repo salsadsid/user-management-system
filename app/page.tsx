@@ -23,7 +23,6 @@ export default function Home() {
     return data.filter(
       (user: any) =>
         user.name.toLowerCase().includes(lowerSearch) ||
-        user.username.toLowerCase().includes(lowerSearch) ||
         user.email.toLowerCase().includes(lowerSearch)
     );
   }, [data, search]);
