@@ -1,6 +1,8 @@
 "use client";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useQuery } from "@tanstack/react-query";
+import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import React from "react";
 
@@ -29,15 +31,43 @@ export default function UserDetailsPage({
 
   if (isLoading)
     return (
-      <div className="p-8 flex items-center justify-center">
-        <div className="text-sm text-muted-foreground">Loading user...</div>
+      <div className="p-8">
+        <div className="max-w-2xl mx-auto">
+          <Skeleton className="h-6 w-48 mb-4" />
+          <div className="grid gap-3">
+            <Skeleton className="h-24 w-full" />
+            <Skeleton className="h-12 w-full" />
+            <Skeleton className="h-12 w-full" />
+          </div>
+        </div>
       </div>
     );
   if (error || !user || user.id === undefined)
-    return <div className="p-8 text-center text-red-500">User not found.</div>;
+    return (
+      <div className="p-8">
+        <div className="max-w-2xl mx-auto">
+          <div className="p-6 rounded bg-red-50 border border-red-100 text-red-700">
+            <div className="font-semibold">User not found</div>
+            <div className="text-sm">
+              We couldn't find this user. Try returning to the list.
+            </div>
+            <div className="mt-3">
+              <Button variant="outline" size="sm" onClick={() => router.back()}>
+                Back to list
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+      className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8"
+    >
       <div className="max-w-4xl mx-auto">
         <div className="mb-6 flex items-center justify-between">
           <div>
@@ -99,6 +129,6 @@ export default function UserDetailsPage({
           </div>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }

@@ -1,8 +1,10 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
 import { UserTable } from "@/components/user-table/UserTable";
 import { useQuery } from "@tanstack/react-query";
+import { motion } from "framer-motion";
 import React from "react";
 
 function fetchUsers() {
@@ -34,7 +36,7 @@ export default function Home() {
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-5xl mx-auto">
         <header className="flex items-center justify-between mb-6">
-          <div>
+          <div className="-ml-1">
             <h1 className="text-2xl font-semibold">User Dashboard</h1>
             <p className="text-sm text-muted-foreground">
               Manage and view users
@@ -42,7 +44,12 @@ export default function Home() {
           </div>
         </header>
 
-        <div className="bg-white shadow rounded-lg p-6">
+        <motion.div
+          className="bg-white shadow rounded-lg p-6"
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-3">
             <div className="flex-1 flex gap-2">
               <Input
@@ -66,10 +73,23 @@ export default function Home() {
             </div>
           </div>
 
-          {isLoading && <div>Loading users...</div>}
-          {error && <div className="text-red-500">Error loading users</div>}
+          {isLoading && (
+            <div className="grid gap-3">
+              <Skeleton className="h-12 w-full" />
+              <Skeleton className="h-12 w-full" />
+              <Skeleton className="h-12 w-full" />
+            </div>
+          )}
+          {error && (
+            <div className="p-4 border rounded bg-red-50 text-red-700">
+              <div className="font-semibold">Failed to load users</div>
+              <div className="text-sm">
+                Please try again or check your network.
+              </div>
+            </div>
+          )}
           {data && <UserTable data={filteredData} />}
-        </div>
+        </motion.div>
       </div>
     </div>
   );

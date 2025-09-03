@@ -12,6 +12,7 @@ import {
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
+import { motion } from "framer-motion";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React from "react";
@@ -113,7 +114,7 @@ export function UserTable({ data }: { data: User[] }) {
 
           <tbody>
             {table.getRowModel().rows.map((row, rIdx) => (
-              <tr
+              <motion.tr
                 key={row.id}
                 role="button"
                 tabIndex={0}
@@ -124,6 +125,9 @@ export function UserTable({ data }: { data: User[] }) {
                     router.push(`/user/${row.original.id}`);
                   }
                 }}
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.25, delay: rIdx * 0.02 }}
                 className={`hover:bg-gray-100 ${
                   rIdx % 2 === 0 ? "bg-white" : "bg-gray-50"
                 }`}
@@ -158,7 +162,7 @@ export function UserTable({ data }: { data: User[] }) {
                     )}
                   </td>
                 ))}
-              </tr>
+              </motion.tr>
             ))}
           </tbody>
         </table>
