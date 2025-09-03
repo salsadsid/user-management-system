@@ -67,14 +67,27 @@ export function UserTable({ data }: { data: any[] }) {
           <thead className="bg-gray-100">
             {table.getHeaderGroups().map((headerGroup) => (
               <tr key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <th key={header.id} className="px-4 py-2 border-b text-left">
-                    {flexRender(
-                      header.column.columnDef.header,
-                      header.getContext()
-                    )}
-                  </th>
-                ))}
+                {headerGroup.headers.map((header) => {
+                  const hideOnMobile = new Set([
+                    "username",
+                    "phone",
+                    "website",
+                  ]);
+                  const respClass = hideOnMobile.has(header.id)
+                    ? "hidden sm:table-cell"
+                    : "";
+                  return (
+                    <th
+                      key={header.id}
+                      className={`px-4 py-2 border-b text-left ${respClass}`}
+                    >
+                      {flexRender(
+                        header.column.columnDef.header,
+                        header.getContext()
+                      )}
+                    </th>
+                  );
+                })}
               </tr>
             ))}
           </thead>
@@ -83,29 +96,50 @@ export function UserTable({ data }: { data: any[] }) {
               <tr
                 key={row.id}
                 className="cursor-pointer hover:bg-gray-50"
+                role="button"
+                tabIndex={0}
                 onClick={() => router.push(`/user/${row.original.id}`)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    router.push(`/user/${row.original.id}`);
+                  }
+                }}
               >
-                {row.getVisibleCells().map((cell) => (
-                  <td key={cell.id} className="px-4 py-2 border-b">
-                    {cell.column.id === "name" ? (
-                      <Link
-                        href={`/user/${row.original.id}`}
-                        className="text-blue-600 underline cursor-pointer"
-                        onClick={(e: any) => e.stopPropagation()}
-                      >
-                        {flexRender(
+                {row.getVisibleCells().map((cell) => {
+                  const hideOnMobile = new Set([
+                    "username",
+                    "phone",
+                    "website",
+                  ]);
+                  const respClass = hideOnMobile.has(cell.column.id)
+                    ? "hidden sm:table-cell"
+                    : "";
+                  return (
+                    <td
+                      key={cell.id}
+                      className={`px-4 py-2 border-b ${respClass}`}
+                    >
+                      {cell.column.id === "name" ? (
+                        <Link
+                          href={`/user/${row.original.id}`}
+                          className="text-blue-600 underline cursor-pointer"
+                          onClick={(e: any) => e.stopPropagation()}
+                        >
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext()
+                          ) ?? String(cell.getValue())}
+                        </Link>
+                      ) : (
+                        flexRender(
                           cell.column.columnDef.cell,
                           cell.getContext()
-                        ) ?? String(cell.getValue())}
-                      </Link>
-                    ) : (
-                      flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      ) ?? String(cell.getValue())
-                    )}
-                  </td>
-                ))}
+                        ) ?? String(cell.getValue())
+                      )}
+                    </td>
+                  );
+                })}
               </tr>
             ))}
           </tbody>
