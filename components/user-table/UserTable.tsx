@@ -21,12 +21,12 @@ export function UserTable({ data }: { data: any[] }) {
 
   // Pagination state
   const [page, setPage] = React.useState(0);
-  const pageSize = 5;
+  const [pageSize, setPageSize] = React.useState(5);
   const pageCount = Math.ceil(data.length / pageSize);
   const pagedData = React.useMemo(() => {
     const start = page * pageSize;
     return data.slice(start, start + pageSize);
-  }, [data, page]);
+  }, [data, page, pageSize]);
 
   const table = useReactTable({
     data: pagedData,
@@ -34,8 +34,30 @@ export function UserTable({ data }: { data: any[] }) {
     getCoreRowModel: getCoreRowModel(),
   });
 
+  // Reset to first page when pageSize changes
+  React.useEffect(() => {
+    setPage(0);
+  }, [pageSize]);
+
   return (
     <div className="overflow-x-auto">
+      <div className="mb-2 flex items-center gap-2">
+        <label htmlFor="page-size" className="text-sm">
+          Users per page:
+        </label>
+        <select
+          id="page-size"
+          value={pageSize}
+          onChange={(e) => setPageSize(Number(e.target.value))}
+          className="border rounded px-2 py-1"
+        >
+          {[5, 10, 15, 20].map((size) => (
+            <option key={size} value={size}>
+              {size}
+            </option>
+          ))}
+        </select>
+      </div>
       <table className="min-w-full border border-gray-200 rounded">
         <thead className="bg-gray-100">
           {table.getHeaderGroups().map((headerGroup) => (
