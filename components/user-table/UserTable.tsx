@@ -5,6 +5,7 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import React from "react";
 
 export function UserTable({ data }: { data: any[] }) {
@@ -35,6 +36,8 @@ export function UserTable({ data }: { data: any[] }) {
     columns,
     getCoreRowModel: getCoreRowModel(),
   });
+
+  const router = useRouter();
 
   React.useEffect(() => {
     setPage(0);
@@ -77,13 +80,18 @@ export function UserTable({ data }: { data: any[] }) {
           </thead>
           <tbody>
             {table.getRowModel().rows.map((row) => (
-              <tr key={row.id} className="cursor-pointer hover:bg-gray-50">
+              <tr
+                key={row.id}
+                className="cursor-pointer hover:bg-gray-50"
+                onClick={() => router.push(`/user/${row.original.id}`)}
+              >
                 {row.getVisibleCells().map((cell) => (
                   <td key={cell.id} className="px-4 py-2 border-b">
                     {cell.column.id === "name" ? (
                       <Link
                         href={`/user/${row.original.id}`}
                         className="text-blue-600 underline cursor-pointer"
+                        onClick={(e: any) => e.stopPropagation()}
                       >
                         {flexRender(
                           cell.column.columnDef.cell,
