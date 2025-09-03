@@ -4,9 +4,14 @@ import {
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
+import Link from "next/link";
 import React from "react";
 
 export function UserTable({ data }: { data: any[] }) {
+  const [selectedUser, setSelectedUser] = React.useState<any | null>(null);
+  const [page, setPage] = React.useState(0);
+  const [pageSize, setPageSize] = React.useState(5);
+
   const columns = React.useMemo(
     () => [
       { accessorKey: "id", header: "ID" },
@@ -19,9 +24,6 @@ export function UserTable({ data }: { data: any[] }) {
     []
   );
 
-  // Pagination state
-  const [page, setPage] = React.useState(0);
-  const [pageSize, setPageSize] = React.useState(5);
   const pageCount = Math.ceil(data.length / pageSize);
   const pagedData = React.useMemo(() => {
     const start = page * pageSize;
@@ -34,77 +36,92 @@ export function UserTable({ data }: { data: any[] }) {
     getCoreRowModel: getCoreRowModel(),
   });
 
-  // Reset to first page when pageSize changes
   React.useEffect(() => {
     setPage(0);
   }, [pageSize]);
 
   return (
-    <div className="overflow-x-auto">
-      <div className="mb-2 flex items-center gap-2">
-        <label htmlFor="page-size" className="text-sm">
-          Users per page:
-        </label>
-        <select
-          id="page-size"
-          value={pageSize}
-          onChange={(e) => setPageSize(Number(e.target.value))}
-          className="border rounded px-2 py-1"
-        >
-          {[5, 10, 15, 20].map((size) => (
-            <option key={size} value={size}>
-              {size}
-            </option>
-          ))}
-        </select>
-      </div>
-      <table className="min-w-full border border-gray-200 rounded">
-        <thead className="bg-gray-100">
-          {table.getHeaderGroups().map((headerGroup) => (
-            <tr key={headerGroup.id}>
-              {headerGroup.headers.map((header) => (
-                <th key={header.id} className="px-4 py-2 border-b text-left">
-                  {flexRender(
-                    header.column.columnDef.header,
-                    header.getContext()
-                  )}
-                </th>
-              ))}
-            </tr>
-          ))}
-        </thead>
-        <tbody>
-          {table.getRowModel().rows.map((row) => (
-            <tr key={row.id}>
-              {row.getVisibleCells().map((cell) => (
-                <td key={cell.id} className="px-4 py-2 border-b">
-                  {flexRender(cell.column.columnDef.cell, cell.getContext()) ??
-                    String(cell.getValue())}
-                </td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      {/* Pagination Controls */}
-      <div className="flex items-center justify-center gap-2 mt-4">
-        <button
-          className="px-3 py-1 border rounded disabled:opacity-50"
-          onClick={() => setPage((p) => Math.max(p - 1, 0))}
-          disabled={page === 0}
-        >
-          Previous
-        </button>
-        <span>
-          Page {page + 1} of {pageCount}
-        </span>
-        <button
-          className="px-3 py-1 border rounded disabled:opacity-50"
-          onClick={() => setPage((p) => Math.min(p + 1, pageCount - 1))}
-          disabled={page >= pageCount - 1}
-        >
-          Next
-        </button>
+    <div>
+      <div className="overflow-x-auto">
+        <div className="mb-2 flex items-center gap-2">
+          <label htmlFor="page-size" className="text-sm">
+            Users per page:
+          </label>
+          <select
+            id="page-size"
+            value={pageSize}
+            onChange={(e) => setPageSize(Number(e.target.value))}
+            className="border rounded px-2 py-1"
+          >
+            {[5, 10, 15, 20].map((size) => (
+              <option key={size} value={size}>
+                {size}
+              </option>
+            ))}
+          </select>
+        </div>
+        <table className="min-w-full border border-gray-200 rounded">
+          <thead className="bg-gray-100">
+            {table.getHeaderGroups().map((headerGroup) => (
+              <tr key={headerGroup.id}>
+                {headerGroup.headers.map((header) => (
+                  <th key={header.id} className="px-4 py-2 border-b text-left">
+                    {flexRender(
+                      header.column.columnDef.header,
+                      header.getContext()
+                    )}
+                  </th>
+                ))}
+              </tr>
+            ))}
+          </thead>
+          <tbody>
+            {table.getRowModel().rows.map((row) => (
+              <tr key={row.id} className="cursor-pointer hover:bg-gray-50">
+                {row.getVisibleCells().map((cell) => (
+                  <td key={cell.id} className="px-4 py-2 border-b">
+                    {cell.column.id === "name" ? (
+                      <Link
+                        href={`/user/${row.original.id}`}
+                        className="text-blue-600 underline cursor-pointer"
+                      >
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        ) ?? String(cell.getValue())}
+                      </Link>
+                    ) : (
+                      flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      ) ?? String(cell.getValue())
+                    )}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        {/* Pagination Controls */}
+        <div className="flex items-center justify-center gap-2 mt-4">
+          <button
+            className="px-3 py-1 border rounded disabled:opacity-50"
+            onClick={() => setPage((p) => Math.max(p - 1, 0))}
+            disabled={page === 0}
+          >
+            Previous
+          </button>
+          <span>
+            Page {page + 1} of {pageCount}
+          </span>
+          <button
+            className="px-3 py-1 border rounded disabled:opacity-50"
+            onClick={() => setPage((p) => Math.min(p + 1, pageCount - 1))}
+            disabled={page >= pageCount - 1}
+          >
+            Next
+          </button>
+        </div>
       </div>
     </div>
   );
